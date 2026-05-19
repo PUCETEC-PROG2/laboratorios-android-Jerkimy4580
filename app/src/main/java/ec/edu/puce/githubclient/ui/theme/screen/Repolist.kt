@@ -1,51 +1,76 @@
 package ec.edu.puce.githubclient.ui.theme.screen
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ec.edu.puce.githubclient.ui.theme.components.RepoItem
+import ec.edu.puce.githubclient.viewmodels.RepoListViewModel
 
 @Composable
+fun RepoList(
+    modifier: Modifier = Modifier,
+    viewModel: RepoListViewModel = viewModel()
+) {
 
-fun RepoList (){
-    Column (
-        modifier = Modifier
-            .padding(horizontal = 4.dp, vertical = 48.dp)
-    ){
+    val repos by viewModel.repos.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMsg by viewModel.errorMsg.collectAsState()
 
-        RepoItem(
-            name = "Charmander",
-            description = "Pokemon Tipo Fuego",
-            avatarImg = "https://i.pinimg.com/564x/60/99/83/609983ed72d4220da851afed92db0418.jpg",
-            languaje = "Char Char!!"
-        )
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
 
-        RepoItem(
-            name = "Eve",
-            description = "Pokemon Tipo Normal",
-            avatarImg = "https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/133.png",
-            languaje = "UWUWWUWU!!!"
-        )
+        if (isLoading) {
 
-        RepoItem(
-            name = "Squirtle",
-            description = "Pokemon Tipo Agua",
-            avatarImg = "https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/007.png",
-            languaje = "ScuerScuer"
-        )
+            CircularProgressIndicator(
+                modifier = modifier.align(Alignment.Center)
+            )
+        }
 
+        errorMsg?.let {
 
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(all = 16.dp)
+            )
+        }
+
+        if (!isLoading && errorMsg == null) {
+
+            LazyColumn(
+                modifier = modifier.fillMaxSize()
+            ) {
+
+                items(repos) { repo ->
+
+                    RepoItem(
+                        repository = repo
+                    )
+                }
+            }
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
+fun RepoListPreview() {
 
-fun RepoListPreview (){
-    RepoList(
-
-    )
+    RepoList()
 }
