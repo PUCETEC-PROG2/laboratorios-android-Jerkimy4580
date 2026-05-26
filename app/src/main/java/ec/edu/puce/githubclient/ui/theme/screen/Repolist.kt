@@ -5,8 +5,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,46 +28,66 @@ import ec.edu.puce.githubclient.viewmodels.RepoListViewModel
 @Composable
 fun RepoList(
     modifier: Modifier = Modifier,
-    viewModel: RepoListViewModel = viewModel()
+    viewModel: RepoListViewModel = viewModel(),
+    onNavigateToForm: () -> Unit = {},
 ) {
 
     val repos by viewModel.repos.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMsg by viewModel.errorMsg.collectAsState()
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-
-        if (isLoading) {
-
-            CircularProgressIndicator(
-                modifier = modifier.align(Alignment.Center)
-            )
-        }
-
-        errorMsg?.let {
-
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(all = 16.dp)
-            )
-        }
-
-        if (!isLoading && errorMsg == null) {
-
-            LazyColumn(
-                modifier = modifier.fillMaxSize()
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNavigateToForm,
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Añadir Repositorio"
+                )
+            }
+        }
+    ) { paddingValues ->
 
-                items(repos) { repo ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
 
-                    RepoItem(
-                        repository = repo
-                    )
+            if (isLoading) {
+
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
+            errorMsg?.let {
+
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(all = 16.dp)
+                )
+            }
+
+            if (!isLoading && errorMsg == null) {
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+
+                    items(repos) { repo ->
+
+                        RepoItem(
+                            repository = repo
+                        )
+                    }
                 }
             }
         }
