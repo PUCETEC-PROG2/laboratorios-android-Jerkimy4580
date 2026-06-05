@@ -3,6 +3,7 @@ package ec.edu.puce.githubclient.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ec.edu.puce.githubclient.models.Repository
+import ec.edu.puce.githubclient.models.RepositoryPayLoad
 import ec.edu.puce.githubclient.services.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,6 +45,40 @@ class RepoListViewModel : ViewModel() {
 
             } finally {
 
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun updateRepo(owner: String, repoName: String, payload: RepositoryPayLoad) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                RetrofitClient.apiService.updateRepository(owner, repoName, payload)
+                fetchRepos()
+            } catch (e: Exception) {
+                _errorMsg.value = "Error al actualizar: ${e.localizedMessage}"
+                e.printStackTrace()
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun deleteRepo(owner: String, repoName: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitClient.apiService.deleteRepository(owner, repoName)
+                if (response.isSuccessful) {
+                    fetchRepos()
+                } else {
+                    _errorMsg.value = "Error al eliminar: ${response.message()}"
+                }
+            } catch (e: Exception) {
+                _errorMsg.value = "Error al eliminar: ${e.localizedMessage}"
+                e.printStackTrace()
+            } finally {
                 _isLoading.value = false
             }
         }
